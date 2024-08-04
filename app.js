@@ -182,9 +182,9 @@ app.post('/api/trains/create', authenticateToken, isAdmin, async (req, res) => {
 });
 
 app.get('/api/trains/availability', async (req, res) => {
-    //const { source, destination } = req.query;
+    const { source, destination } = req.query;
     try {
-        const trains = await Train.findAll({  });
+        const trains = await Train.findAll({ where: { source, destination } });
         res.json(trains);
     } catch (err) {
         res.status(400).send('Error fetching trains');
@@ -220,6 +220,18 @@ app.get('/api/bookings/:bookingId', authenticateToken, async (req, res) => {
     const { userId } = req.user;
     try {
         const booking = await Booking.findOne({ where: { booking_id: bookingId, user_id: userId } });
+        if (!booking) {
+            return res.status(404).send('Booking not found');
+        }
+        res.json(booking);
+    } catch (err) {
+        res.status(400).send('Error fetching booking');
+    }
+});
+app.get('/api/bookings/', authenticateToken, async (req, res) => {
+    const { userId } = req.user;
+    try {
+        const booking = await Booking.findOne({ where: {  user_id: userId } });
         if (!booking) {
             return res.status(404).send('Booking not found');
         }
